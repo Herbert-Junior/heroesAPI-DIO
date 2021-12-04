@@ -1,0 +1,12 @@
+server:
+  port: 8080
+
+amazon:
+  access:
+    key: ""
+    secret-key: ""
+  region: sa-east-1
+  end-point:
+    url: http://localhost:8004/
+  dynamodb:
+    endpoint: http://localhost:8004

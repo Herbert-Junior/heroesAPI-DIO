@@ -2,7 +2,9 @@ package com.digitalinnovationone.heroesapi.controller;
 
 import com.digitalinnovationone.heroesapi.document.Heroes;
 import com.digitalinnovationone.heroesapi.repository.HeroesRepository;
+import com.digitalinnovationone.heroesapi.service.DynamoService;
 import com.digitalinnovationone.heroesapi.service.HeroesService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,17 +22,19 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 
 public class HeroesController {
+    @Autowired
     HeroesService heroesService;
 
+    @Autowired
     HeroesRepository heroesRepository;
+
+    @Autowired
+    DynamoService dyservice;
 
     private static final org.slf4j.Logger log =
             org.slf4j.LoggerFactory.getLogger(HeroesController.class);
 
-    public HeroesController(HeroesService heroesService, HeroesRepository heroesRepository) {
-        this.heroesService = heroesService;
-        this.heroesRepository = heroesRepository;
-    }
+
 
     @GetMapping(HERDES_ENDPOINT_LOCAL)
     @ResponseStatus(HttpStatus.OK)
@@ -56,6 +60,13 @@ public class HeroesController {
 
     }
 
+    @GetMapping("/listTables")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<Void> getAllTables() {
+        dyservice.listTables();
+        return heroesService.listTables();
+
+    }
     @DeleteMapping(HERDES_ENDPOINT_LOCAL + "/{id}")
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     public Mono<HttpStatus> deletebyIDHero(@PathVariable String id) {
