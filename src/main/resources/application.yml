@@ -7,6 +7,6 @@ amazon:
     secret-key: ""
   region: sa-east-1
   end-point:
-    url: http://localhost:8004/
+    url: https://dynamodb.sa-east-1.amazonaws.com
   dynamodb:
-    endpoint: http://localhost:8004
+    endpoint: https://dynamodb.sa-east-1.amazonaws.com

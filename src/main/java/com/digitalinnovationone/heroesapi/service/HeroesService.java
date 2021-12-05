@@ -3,8 +3,10 @@ package com.digitalinnovationone.heroesapi.service;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
+import com.amazonaws.services.dynamodbv2.model.ProvisionedThroughput;
 import com.digitalinnovationone.heroesapi.document.Heroes;
 import com.digitalinnovationone.heroesapi.repository.HeroesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +23,17 @@ public class HeroesService {
     @Autowired
     private HeroesRepository heroesRepository;
 
+    private DynamoDBMapper dynamoDBMapper;
+
+    @Autowired
+    private AmazonDynamoDB amazonDynamoDB;
+
     public Flux<Heroes> findAll(){
 
         return Flux.fromIterable(this.heroesRepository.findAll());
     }
 
-    public Mono<Heroes> findByIdHero(String id){
+    public Mono<Heroes> findById(String id){
 
         return  Mono.justOrEmpty(this.heroesRepository.findById(id));
     }
@@ -54,6 +61,20 @@ public class HeroesService {
         );
 
         return Flux.empty();
+    }
+
+    public Mono<Void> createTable() {
+
+        dynamoDBMapper = new DynamoDBMapper(amazonDynamoDB);
+
+        CreateTableRequest tableRequest = dynamoDBMapper
+                .generateCreateTableRequest(Heroes.class);
+        tableRequest.setProvisionedThroughput(
+                new ProvisionedThroughput(1L, 1L));
+
+
+        amazonDynamoDB.createTable(tableRequest);
+        return Mono.empty();
     }
 
 

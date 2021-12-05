@@ -2,7 +2,6 @@ package com.digitalinnovationone.heroesapi.controller;
 
 import com.digitalinnovationone.heroesapi.document.Heroes;
 import com.digitalinnovationone.heroesapi.repository.HeroesRepository;
-import com.digitalinnovationone.heroesapi.service.DynamoService;
 import com.digitalinnovationone.heroesapi.service.HeroesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,12 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import static com.digitalinnovationone.heroesapi.constants.HeroesConstant.HERDES_ENDPOINT_LOCAL;
-
-
-import lombok.extern.slf4j.Slf4j;
-
-
-
 
 
 @RestController
@@ -28,8 +21,7 @@ public class HeroesController {
     @Autowired
     HeroesRepository heroesRepository;
 
-    @Autowired
-    DynamoService dyservice;
+
 
     private static final org.slf4j.Logger log =
             org.slf4j.LoggerFactory.getLogger(HeroesController.class);
@@ -47,9 +39,15 @@ public class HeroesController {
     @GetMapping(HERDES_ENDPOINT_LOCAL + "/{id}")
     public Mono<ResponseEntity<Heroes>> findByIdHero(@PathVariable String id) {
         log.info("Requesting the hero with id {}", id);
-        return heroesService.findByIdHero(id)
+        return heroesService.findById(id)
                 .map((item) -> new ResponseEntity<>(item, HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @GetMapping("/listTable")
+    public Flux<Void> listTable() {
+        log.info("Requesting the hero with id {}");
+        return heroesService.listTables();
     }
 
     @PostMapping(HERDES_ENDPOINT_LOCAL)
@@ -60,18 +58,27 @@ public class HeroesController {
 
     }
 
-    @GetMapping("/listTables")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<Void> getAllTables() {
-        dyservice.listTables();
-        return heroesService.listTables();
+    @PostMapping("/createTable")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Void> createTable() {
+        log.info("A new Hero was Created");
+        return heroesService.createTable();
 
     }
+
+
     @DeleteMapping(HERDES_ENDPOINT_LOCAL + "/{id}")
-    @ResponseStatus(code = HttpStatus.NOT_FOUND)
+    @ResponseStatus(code = HttpStatus.OK)
     public Mono<HttpStatus> deletebyIDHero(@PathVariable String id) {
-        heroesService.deletebyIDHero(id);
-        log.info("Deleting the hero with id {}", id);
-        return Mono.just(HttpStatus.NOT_FOUND);
+        try{
+            log.info("Deleting the hero with id {}", id);
+            heroesService.deletebyIDHero(id);
+            return Mono.just(HttpStatus.OK);
+
+        }catch (Exception e){
+            log.error("Erro ao deletar ID inexistente", e);
+            return Mono.just(HttpStatus.NOT_FOUND);
+        }
+
     }
 }

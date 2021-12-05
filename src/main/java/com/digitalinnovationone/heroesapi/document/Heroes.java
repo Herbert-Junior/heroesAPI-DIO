@@ -14,6 +14,7 @@ import static com.digitalinnovationone.heroesapi.constants.HeroesConstant.TABLE_
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @DynamoDBTable(tableName = TABLE_NAME)
 public class Heroes {
 
